@@ -1,28 +1,31 @@
-var mark = (function () {
+function Mark(markObj) {
+	if (markObj) {
+		this.title = markObj.title
+		this.url = markObj.url
+		this.state = markObj.state || Mark.READING
+		this.addTime = markObj.addTime || (+new Date)
+		this.finishTime = markObj.finishTime
+	}
+}
 
-	function get(key) {
-		var result = localStorage.getItem(key) 
-		return result ? JSON.parse(result) : null
+Mark.FINISHED = 'finished'
+Mark.READING = 'reading'
+Mark.expire = 30
+
+Mark.prototype = {
+	isFinish : function () {
+		return this.state === Mark.FINISHED
+	},
+
+	isReading : function () {
+		var time = +new Date
+		return this.state === Mark.READING && (this.addTime + 86400000 * Mark.expire - time > 0 )
+	},
+
+	getLeftDays : function () {
+		var time = +new Date
+		return Math.ceil((this.addTime +  86400000 * 30 - time ) /  86400000)
 	}
 
-	function set(key,value) {
-		return localStorage.setItem(key,JSON.stringify(value))
-	}
-	return {
-		add : function (url) {
-			// body...
-		},
 
-
-		remove : function (argument) {
-			// body...
-		},
-		get : function (argument) {
-			// body...
-		},
-
-		getAll : function (argument) {
-			// body...
-		}
-	};
-})();
+}

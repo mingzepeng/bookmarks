@@ -4,13 +4,38 @@
 	<title>chrome extension</title>
 	<style type="text/css">
 		button{
+			display: block;
 			white-space: nowrap;
+			border : none;
+			background : none;
+			color: #08c;
+			margin-bottom: 2px;
+			cursor:  pointer;
+			font-size: 14px;
+			padding : 5px 10px;
+		}
+		button:disabled{
+			color: #ccc;
+			cursor: not-allowed;
+		}
+		button:hover{
+			text-decoration: underline;
+		}
+		button:disabled:hover{
+			text-decoration: none;
 		}
 	</style>
 </head>
 <body>
-	<div><button id="finish-reading" type="button">阅读完毕</button></div>
-	<div><button id="add-reading" type="button">加入阅读</button></div>
+	<div>
+		<button id="add-reading" type="button">加入阅读</button>
+		<button id="finish-reading" type="button">阅读完毕</button>
+		<button id="manage-reading" type="button">管理阅读</button>
+		<button id="remove" type="button">删除</button>
+		<button id="remove-all" type="button">删除所有</button>
+	</div>
 </body>
+<script type="text/javascript" src="mark.js"></script>
+<script type="text/javascript" src="markService.js"></script>
 <script type="text/javascript" src="popup.js"></script>
 </html>
