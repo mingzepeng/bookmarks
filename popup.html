@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
 	<title>chrome extension</title>
 	<style type="text/css">
 		button{
-			display: block;
+			/*display: block;*/
 			white-space: nowrap;
 			border : none;
 			background : none;
@@ -24,16 +25,51 @@
 		button:disabled:hover{
 			text-decoration: none;
 		}
+		#list{
+			width: 500px;
+			max-height: 300px;
+			overflow: auto;
+			list-style: none;
+			margin : 0;
+			padding: 0;
+		}
+		#list li{
+			margin: 0;
+			padding: 0;
+			line-height: 1.5;
+			
+			white-space:nowrap; 
+			/*width:12em; */
+			overflow:hidden; 
+			text-overflow:ellipsis;
+		}
+		#list li a{
+			/*color: inherit;*/
+			font-size: 13px;
+			color: #08c;
+		}
+		#list li a.danger{
+			/*color: inherit;*/
+			/*font-size: 13px;*/
+			color: #d9534f;
+		}
+		#operates{
+			text-align: right;
+
+		}
 	</style>
 </head>
 <body>
-	<div>
+	<div id="operates">
 		<button id="add-reading" type="button">加入阅读</button>
 		<button id="finish-reading" type="button">阅读完毕</button>
-		<button id="manage-reading" type="button">管理阅读</button>
 		<button id="remove" type="button">删除</button>
 		<button id="remove-all" type="button">删除所有</button>
+		<!-- <button id="manage-reading" type="button">阅读列表</button> -->
 	</div>
+	<ul id="list">
+		
+	</ul>
 </body>
 <script type="text/javascript" src="mark.js"></script>
 <script type="text/javascript" src="markService.js"></script>

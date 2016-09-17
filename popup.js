@@ -6,6 +6,29 @@
 	var $$ = document.querySelectorAll.bind(document)
 	var $addBtn = $('#add-reading');
 	var $finishBtn = $('#finish-reading');
+	var $list = $('#list')
+
+	function generateList(marks) {
+		// var html = []
+		if (marks) {
+			var html = marks
+				.filter(function(mark){
+					return mark.isReading()
+				})
+				.map(function (mark) {
+					var leftDays = mark.getLeftDays()
+					var className = ''
+					if (leftDays <= 5) {
+						className = 'danger'
+					}
+					return '<li><a class="'+className+'" title="'+mark.title+'" target="_blank" href="'+mark.url+'">('+ mark.getLeftDays() + ')' + mark.title +'</a></li>'
+				})
+				.join('')
+			$list.innerHTML = html
+		}
+
+	}
+
 	$('#remove').addEventListener('click',function () {
 		chrome.tabs.getSelected(function (tab) {
 			if (tab) {
@@ -18,7 +41,8 @@
 		})
 	});
 	$('#remove-all').addEventListener('click',function () {
-		markService.removeAll()
+		markService.removeAll();
+		window.close();
 	});
 
 	$finishBtn.addEventListener('click',function () {
@@ -27,6 +51,15 @@
 			if (tab) {
 				var url = tab.url
 				markService.finish(url)
+
+				
+				var marks = markService.getAllReading()
+				if (marks && marks.length > 0) {
+					var text = marks.length + ''
+					var bgColor = [0, 255, 255, 250]
+					chrome.browserAction.setBadgeText({text:text});
+					chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
+				}
 			}else{
 				alert('no tab')
 			}
@@ -39,6 +72,14 @@
 				var url = tab.url
 				var title = tab.title
 				markService.add(url,title)
+
+				var marks = markService.getAllReading()
+				if (marks && marks.length > 0) {
+					var text = marks.length + ''
+					var bgColor = [0, 255, 255, 250]
+					chrome.browserAction.setBadgeText({text:text});
+					chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
+				}
 			}else{
 				alert('no tab')
 			}
@@ -61,5 +102,8 @@
 		}else{
 			alert('no tab')
 		}
+		var marks = markService.getAllReading()
+		generateList(marks)
 	})
+
 })();
