@@ -1,10 +1,16 @@
 // chrome.browserAction.setBadgeText({text:'text'});
 
-var marks = markService.getAllReading()
-if (marks && marks.length > 0) {
-	var text = marks.length + ''
-	var bgColor = [0, 255, 255, 250]
-	chrome.browserAction.setBadgeText({text:text});
+// var marks = markService.getAllReading()
+var mark = markService.getOldestMark()
+if (mark) {
+	var text = mark.getLeftDays()
+	var bgColor = null
+	if (text <= 5) {
+		bgColor = [255,80, 0, 250]
+	}else{
+		bgColor = [100, 200, 255, 250]
+	}
+	chrome.browserAction.setBadgeText({text:text + ''});
 	chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
 }
 

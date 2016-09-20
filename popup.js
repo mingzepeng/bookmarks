@@ -29,6 +29,22 @@
 
 	}
 
+	function setBadge() {
+		// var marks = markService.getAllReading()
+		var mark = markService.getOldestMark()
+		if (mark) {
+			var text = mark.getLeftDays()
+			var bgColor = null
+			if (text <= 5) {
+				bgColor = [255,80, 0, 250]
+			}else{
+				bgColor = [100, 200, 255, 250]
+			}
+			chrome.browserAction.setBadgeText({text:text + ''});
+			chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
+		}
+	}
+
 	$('#remove').addEventListener('click',function () {
 		chrome.tabs.getSelected(function (tab) {
 			if (tab) {
@@ -51,15 +67,7 @@
 			if (tab) {
 				var url = tab.url
 				markService.finish(url)
-
-				
-				var marks = markService.getAllReading()
-				if (marks && marks.length > 0) {
-					var text = marks.length + ''
-					var bgColor = [0, 255, 255, 250]
-					chrome.browserAction.setBadgeText({text:text});
-					chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
-				}
+				setBadge()
 			}else{
 				alert('no tab')
 			}
@@ -72,38 +80,31 @@
 				var url = tab.url
 				var title = tab.title
 				markService.add(url,title)
-
-				var marks = markService.getAllReading()
-				if (marks && marks.length > 0) {
-					var text = marks.length + ''
-					var bgColor = [0, 255, 255, 250]
-					chrome.browserAction.setBadgeText({text:text});
-					chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
-				}
 			}else{
 				alert('no tab')
 			}
 			window.close();
 		})
 	});
-
-	chrome.tabs.getSelected(function (tab) {
-		if (tab) {
-			var url = tab.url
-			var mark = markService.get(url)
-			if (mark) {
-				$addBtn.disabled = true
+	if (typeof chrome !== 'undefined' && chrome.tabs) {
+		chrome.tabs.getSelected(function (tab) {
+			if (tab) {
+				var url = tab.url
+				var mark = markService.get(url)
+				if (mark) {
+					$addBtn.disabled = true
+				}
+				// var hasMark = mark.has(url)
+				// var isFinish = mark.isFinish(url)
+				if (!(mark && mark.isReading())) {
+					$finishBtn.disabled = true
+				}
+			}else{
+				alert('no tab')
 			}
-			// var hasMark = mark.has(url)
-			// var isFinish = mark.isFinish(url)
-			if (!(mark && mark.isReading())) {
-				$finishBtn.disabled = true
-			}
-		}else{
-			alert('no tab')
-		}
-		var marks = markService.getAllReading()
-		generateList(marks)
-	})
+		})
+	}
+	var marks = markService.getAllReading()
+	generateList(marks)
 
 })();

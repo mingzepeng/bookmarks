@@ -93,7 +93,7 @@ var markService = (function () {
 			// body...
 		},
 
-		getAll : function (url) {
+		getAll : function (filter) {
 			var marksArr = []
 			var marks = get(KEY)
 			if (marks) {
@@ -110,32 +110,21 @@ var markService = (function () {
 				marksArr = marksArr.map(function (markObj) {
 					return new Mark(markObj)
 				})
+				if (typeof filter === 'function') {
+					marksArr = marksArr.filter(filter)
+				}
 			}
 			return marksArr
 		},
-		getAllReading : function (url) {
-			var marksArr = []
-			var marks = get(KEY)
-			if (marks) {
-				for(var url in marks){
-					var addTime = marks[url].addTime
-					var finishTime = marks[url].finishTime
-					var title = marks[url].title
-					var state = marks[url].state
-					marksArr.push({url : url,title : title, addTime : addTime, finishTime : finishTime, state : state})
-				}
-				marksArr.sort(function (item1,item2) {
-					return item1.addTime > item2.addTime
-				})
-				marksArr = marksArr
-					.map(function (markObj) {
-						return new Mark(markObj)
-					})
-					.filter(function(mark) {
-						return mark.isReading()
-					})
-			}
-			return marksArr
+		getAllReading : function () {
+			return this.getAll(function(mark){
+				return mark.isReading()
+			})
+		},
+
+		getOldestMark : function() {
+			var marks = this.getAllReading()
+			return marks[0] || null
 		}
 	};
 })();
