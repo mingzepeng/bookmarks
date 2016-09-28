@@ -1,0 +1,38 @@
+{
+  "name": "bce-sdk-js",
+  "description": "Baidu Cloud Engine JavaScript SDK",
+  "main": "baidubce-sdk.bundle.js",
+  "authors": [
+    "leeight@gmail.com"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "bce",
+    "cloud",
+    "javascript",
+    "sdk"
+  ],
+  "moduleType": [],
+  "homepage": "https://github.com/baidubce/bce-sdk-js",
+  "ignore": [
+    "**/.*",
+    "website",
+    "demo",
+    "docs",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "version": "0.2.1",
+  "_release": "0.2.1",
+  "_resolution": {
+    "type": "version",
+    "tag": "0.2.1",
+    "commit": "0d7ce3baac06222fe9aec133a17ff4fe94c89590"
+  },
+  "_source": "https://github.com/baidubce/bce-sdk-js.git",
+  "_target": "^0.2.1",
+  "_originalSource": "bce-sdk-js",
+  "_direct": true
+}
