@@ -41,8 +41,10 @@
 				bgColor = [255,80, 0, 250]
 			}
 		}
-		chrome.browserAction.setBadgeText({text:text + ''});
-		chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
+		if (typeof chrome !== 'undefined' && chrome.browserAction) {
+			chrome.browserAction.setBadgeText({text:text + ''});
+			chrome.browserAction.setBadgeBackgroundColor({color:bgColor});
+		}
 	}
 
 	$('#remove').addEventListener('click',function () {
