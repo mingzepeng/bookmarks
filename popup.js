@@ -1,5 +1,8 @@
 (function () {
 
+	// client.putObjectFromString(bucket, key, data)
+	//   .then(response => console.log(response))    // 成功
+	//   .catch(error => console.error(error));      // 失败
 
 	// body...
 	var $ = document.querySelector.bind(document)
@@ -47,69 +50,87 @@
 		}
 	}
 
-	$('#remove').addEventListener('click',function () {
-		chrome.tabs.getSelected(function (tab) {
-			if (tab) {
-				var url = tab.url
-				markService.remove(url)
-				setBadge()
-			}else{
-				alert('no tab')
-			}
+	function init() {
+		$('#remove').addEventListener('click',function () {
+			chrome.tabs.getSelected(function (tab) {
+				if (tab) {
+					var url = tab.url
+					markService.remove(url)
+					setBadge()
+				}else{
+					alert('no tab')
+				}
+				window.close();
+			})
+		});
+		$('#remove-all').addEventListener('click',function () {
+			markService.removeAll();
+			setBadge()
 			window.close();
-		})
-	});
-	$('#remove-all').addEventListener('click',function () {
-		markService.removeAll();
-		setBadge()
-		window.close();
-	});
+		});
 
-	$finishBtn.addEventListener('click',function () {
-		
-		chrome.tabs.getSelected(function (tab) {
-			if (tab) {
-				var url = tab.url
-				markService.finish(url)
-				setBadge()
-			}else{
-				alert('no tab')
-			}
-			window.close();
-		})
-	});
-	$addBtn.addEventListener('click',function () {
-		chrome.tabs.getSelected(function (tab) {
-			if (tab) {
-				var url = tab.url
-				var title = tab.title
-				markService.add(url,title)
-				setBadge()
-			}else{
-				alert('no tab')
-			}
-			window.close();
-		})
-	});
-	if (typeof chrome !== 'undefined' && chrome.tabs) {
-		chrome.tabs.getSelected(function (tab) {
-			if (tab) {
-				var url = tab.url
-				var mark = markService.get(url)
-				if (mark) {
-					$addBtn.disabled = true
+		$finishBtn.addEventListener('click',function () {
+			
+			chrome.tabs.getSelected(function (tab) {
+				if (tab) {
+					var url = tab.url;
+					var result = markService.finish(url);
+					if (result) {
+						result.then(function () {
+							setBadge();
+						})
+					}
+				}else{
+					alert('no tab')
 				}
-				// var hasMark = mark.has(url)
-				// var isFinish = mark.isFinish(url)
-				if (!(mark && mark.isReading())) {
-					$finishBtn.disabled = true
+				window.close();
+			})
+		});
+		$addBtn.addEventListener('click',function () {
+			chrome.tabs.getSelected(function (tab) {
+				if (tab) {
+					// debugger;
+					var url = tab.url
+					var title = tab.title
+					var result = markService.add(url,title)
+					if (result) {
+						result.then(function () {
+							// debugger
+							setBadge()
+						})
+					}
+				}else{
+					alert('no tab')
 				}
-			}else{
-				alert('no tab')
-			}
-		})
+				window.close();
+			})
+		});
+		if (typeof chrome !== 'undefined' && chrome.tabs) {
+			chrome.tabs.getSelected(function (tab) {
+				if (tab) {
+					var url = tab.url
+					var mark = markService.get(url)
+					if (mark) {
+						$addBtn.disabled = true
+					}
+					// var hasMark = mark.has(url)
+					// var isFinish = mark.isFinish(url)
+					if (!(mark && mark.isReading())) {
+						$finishBtn.disabled = true
+					}
+				}else{
+					alert('no tab')
+				}
+			})
+		}
+		// body...
 	}
-	var marks = markService.getAllReading()
-	generateList(marks)
-	setBadge()
+
+	
+	markService.getAllAsync().then(function (data) {
+		var marks = markService.getAllReading()
+		generateList(marks)
+		setBadge()
+		init()
+	})
 })();

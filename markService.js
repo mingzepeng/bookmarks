@@ -1,14 +1,35 @@
 var markService = (function () {
-	var KEY = 'readmarks'
+	var url = 'http://marks.gz.bcebos.com/1.json?authorization=bce-auth-v1%2F3C6wefc3LtpFadgfRHn6dfMw%2F2016-10-05T15%3A47%3A56Z%2F-1%2Fhost%2Fd103d0f13999e6512e1baf0e8ce1bcad94436b8dd14a161e8f269c50945d2e52';
+	var config = {
+	  endpoint: "http://gz.bcebos.com",         //传入Bucket所在区域域名
+	  credentials: {
+	     ak: "3C6wefc3LtpFadgfRHn6dfMw",         //您的AccessKey
+	     sk: "G7OnK0ZXq6tMQNjlAtfyIzXmUfRFxyPo"       //您的SecretAccessKey
+	  }
+	};
 
+	var client = new baidubce.sdk.BosClient(config);
+	var bucket = 'marks';
+	var bucketObjectKey = '1.json';
+	// var data = JSON.stringify({name : Math.random() * 1000 })
+
+	var KEY = 'readmarks'
+	var tmp_marks = []
 	// var READING = 'reading'
-	function get(key) {
-		var result = localStorage.getItem(key) 
-		return result ? JSON.parse(result) : null
+	function get() {
+		return fetch(url)
+		.then(function(res) {
+			return res.json();
+		})
+		.then(function(json) {
+			return json.data || [];
+		})
 	}
 
-	function set(key,value) {
-		return localStorage.setItem(key,JSON.stringify(value))
+	function set(data) {
+		data = {updateTime : +new Date, data : data};
+		data = JSON.stringify(data);
+		return client.putObjectFromString(bucket, bucketObjectKey, data);
 	}
 
 	function filterUrl(url) {
@@ -25,106 +46,95 @@ var markService = (function () {
 
 	return {
 		add : function (url,title) {
-			url = filterUrl(url)
-			var marks = get(KEY)
-			if (!marks) {
-				marks = {}
+			// url = filterUrl(url)
+			if (this.has(url) < 0) {
+				var mark = new Mark({url : url, title : title});
+				tmp_marks.push(mark);
+				return set(tmp_marks);
 			}
-			if (!marks[url]) {
-				marks[url] = new Mark({url : url, title : title}) 
-				set(KEY,marks)
-				return true
-			}
-			return false
-
 		},
 		save : function (mark) {
-			if (mark) {
-				var marks = get(KEY)
-				var url = mark.url
-				if (!marks) {
-					marks = {}
+			if (mark && mark.url) {
+				var index = this.has(mark.url);
+				if (index >= 0) {
+					tmp_marks[index] = mark;
+					return set(tmp_marks)
 				}
-				marks[url] = mark
-				set(KEY,marks)
 			}
 		},
 
 		has : function (url) {
 			url = filterUrl(url)
-			var marks = get(KEY)
-			if (marks) {
-				return marks[url] ? true : false  
-			}
-			return false
+			var index = -1;
+			tmp_marks.forEach(function (mark,i) {
+				if (mark.url === url) {
+					index = i;
+				}
+			})
+			return index;
 		},
 		finish : function (url) {
-			url = filterUrl(url)
+			// url = filterUrl(url)
 			var mark = this.get(url)
 
 			if (mark && mark.isReading()) {
 				mark.state = Mark.FINISHED
 				mark.finishTime = +new Date
-				this.save(mark)
+				return this.save(mark)
 				// set(KEY,marks)/
-				return true
+				// return true
 			}
-			return false
+			// return false
 		},
 
 		remove : function (url) {
-			url = filterUrl(url)
-			var marks = get(KEY)
-			if (marks && marks[url]) {
-				delete marks[url]
-				set(KEY,marks)
-				return true
+			var index = this.has(url)
+			if (index >= 0) {
+				// return 
+				tmp_marks.splice(index,1);
+				return set(tmp_marks);
+				// tmp_marks[index]
 			}
-			return false
 		},
 		removeAll : function () {
-			set(KEY,{})
-			return true
+			return set([])
+			// return true
 		},
 		get : function (url) {
 			url = filterUrl(url)
-			var marks = get(KEY)
-			return  marks[url] ? new Mark(marks[url]) : null
-			// body...
+			return tmp_marks.filter(function (mark) {
+				return mark.url === url
+			})[0] || null
 		},
 
-		getAll : function (filter) {
-			var marksArr = []
-			var marks = get(KEY)
-			if (marks) {
-				for(var url in marks){
-					var addTime = marks[url].addTime
-					var finishTime = marks[url].finishTime
-					var title = marks[url].title
-					var state = marks[url].state
-					marksArr.push({url : url,title : title, addTime : addTime, finishTime : finishTime, state : state})
-				}
-				marksArr.sort(function (item1,item2) {
+		getAllAsync : function (filter) {
+			return get().then(function(marks) {
+
+				marks.sort(function (item1,item2) {
 					return item1.addTime > item2.addTime
-				})
-				marksArr = marksArr.map(function (markObj) {
+				});
+				marks = marks.map(function (markObj) {
 					return new Mark(markObj)
-				})
+				});
+				tmp_marks = marks.slice(0);
 				if (typeof filter === 'function') {
-					marksArr = marksArr.filter(filter)
+					marks = marks.filter(filter);
 				}
-			}
-			return marksArr
+
+				return marks;
+				// body...
+			});
 		},
 		getAllReading : function () {
-			return this.getAll(function(mark){
-				return mark.isReading()
-			})
+			return tmp_marks.filter(function(mark){
+				return mark.isReading();
+			});
 		},
 
 		getOldestMark : function() {
-			var marks = this.getAllReading()
-			return marks[0] || null
+			return tmp_marks.filter(function (mark,i) {
+				return i === 0;
+			})[0] || null;
 		}
 	};
 })();
